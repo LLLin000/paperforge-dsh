@@ -1,0 +1,15 @@
+{
+  "name": "paperforge-dsh",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PaperForge adapter for DeepSeek Harness (DSH).",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces"
+  },
+  "license": "MIT"
+}

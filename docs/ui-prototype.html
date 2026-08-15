@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="zh-CN" data-ds-dark-theme>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>dsh × PaperForge — UI Prototype</title>
+<style>
+/* ============================================================
+   dsh 设计令牌(实测 deepseek-harness) + 瑞士极简学术风
+   风格原则:线分隔,不用框;灰阶,克制;大量留白
+   ============================================================ */
+:root{
+  --deepseek-500:rgb(65,118,230);
+  --nb300:rgb(207,211,214); --nb400:rgb(173,178,184); --nb500:rgb(151,157,166);
+  --nb600:rgb(129,133,140); --nb700:rgb(97,102,107);  --nb750:rgb(67,69,74);
+  --nb800:rgb(53,54,56);    --nb850:rgb(44,44,46);    --nb875:rgb(35,35,36);
+  --nb900:rgb(27,27,28);    --nb950:rgb(21,21,23);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --mono:"SF Mono","Cascadia Code",ui-monospace,Menlo,Consolas,monospace;
+}
+html[data-ds-dark-theme] body{
+  --bg-base:var(--nb950); --bg-l1:var(--nb875); --bg-l2:var(--nb850); --bg-l3:var(--nb800);
+  --border:rgba(255,255,255,.12); --border-soft:rgba(255,255,255,.06); --border-strong:rgba(255,255,255,.2);
+  --text:rgba(255,255,255,.9); --text-2:rgba(255,255,255,.55); --text-3:rgba(255,255,255,.28);
+  --brand:var(--deepseek-500);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--font); background:var(--bg-base); color:var(--text);
+  font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  overflow:hidden; user-select:none; letter-spacing:-.01em;
+}
+.tnum{font-variant-numeric:tabular-nums}
+
+.app{display:flex;height:100vh;width:100vw}
+/* ---------- 侧边栏 ---------- */
+.sidebar{width:196px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg-l1);border-right:1px solid var(--border-soft)}
+.sb-brand{font-size:12px;font-weight:600;letter-spacing:.02em;padding:16px 16px 4px}
+.sb-hint{color:var(--text-3);font-size:9px;padding:0 16px 10px}
+.sb-search{margin:0 12px 8px;padding:7px 10px;border:1px solid var(--border-soft);color:var(--text-3);font-size:11px}
+.sb-sessions{flex:1;overflow-y:auto;padding:4px 8px}
+.sb-group{font-size:9px;font-weight:600;color:var(--text-3);padding:12px 10px 4px;letter-spacing:.1em;text-transform:uppercase}
+.sess{display:flex;align-items:center;gap:8px;padding:6px 10px;color:var(--text-2);font-size:12px;cursor:pointer}
+.sess:hover{background:var(--bg-l2)}
+.sess.active{background:var(--deepseek-500);color:#fff}
+.sess-title{flex:1;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.sess-time{font-size:9px;color:var(--text-3);flex-shrink:0}
+.sess.active .sess-time{color:rgba(255,255,255,.7)}
+.sb-pf{margin:10px 12px;border-top:1px solid var(--border);padding-top:10px}
+.sb-pf .pf-lbl{font-size:8px;font-weight:700;color:var(--text-3);letter-spacing:.14em;text-transform:uppercase}
+.sb-pf .pf-name{font-size:12px;font-weight:500;margin-top:3px}
+.sb-pf .pf-meta{font-size:9px;color:var(--text-3);margin-top:2px}
+.sb-pf .pf-line{margin-top:7px;font-size:10px;color:var(--text-2);display:flex;align-items:center;gap:6px}
+.sb-pf .tick{width:7px;height:7px;border:1px solid var(--text-2);border-right:none;border-bottom:none;transform:rotate(45deg);display:inline-block}
+/* ---------- 聊天区 ---------- */
+.chat{flex:1;display:flex;flex-direction:column;background:var(--bg-base);min-width:0}
+.chat-head{display:flex;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid var(--border-soft)}
+.chat-head .t{font-size:14px;font-weight:500}
+.chat-head .sub{font-size:11px;color:var(--text-3)}
+.chat-head .toolmode{margin-left:auto;font-size:9.5px;color:var(--text-3);letter-spacing:.04em}
+.msgs{flex:1;overflow-y:auto;padding:28px 32px 12px;display:flex;flex-direction:column;gap:22px}
+.bubble{max-width:660px;display:flex;flex-direction:column}
+.bubble .who{font-size:9.5px;color:var(--text-3);margin-bottom:6px;letter-spacing:.02em}
+.bubble.user{align-self:flex-end;align-items:flex-end}
+.bubble.user .box{background:var(--deepseek-500);color:#fff;border-radius:10px 10px 2px 10px;padding:9px 14px;font-size:13px;line-height:1.5}
+.bubble.agent{align-self:flex-start}
+.bubble.agent .box{background:var(--bg-l1);border:1px solid var(--border-soft);border-radius:10px 10px 10px 2px;padding:10px 15px;font-size:13px;line-height:1.6;color:var(--text)}
+.toolcall{width:100%;max-width:660px;display:flex;flex-direction:column;gap:5px}
+.tc{display:flex;align-items:center;gap:9px;padding:6px 11px;border:1px solid var(--border-soft);border-radius:6px;font-size:12px;background:var(--bg-l1)}
+.tc .nm{color:var(--text-2);font-weight:500;font-family:var(--mono);font-size:11px}
+.tc .arg{color:var(--text-3);font-size:11px;flex:1;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.tc .st{font-size:9px;color:var(--text-3);flex-shrink:0;letter-spacing:.05em;text-transform:uppercase}
+.tc .spin{width:11px;height:11px;border:1.5px solid rgba(255,255,255,.15);border-top-color:rgba(255,255,255,.5);border-radius:50%;animation:sp .8s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.inputbar{border-top:1px solid var(--border-soft);padding:14px 28px 18px;background:var(--bg-base)}
+.inputbox{max-width:700px;margin:0 auto;display:flex;align-items:flex-end;gap:10px;border:1px solid var(--border);border-radius:8px;padding:11px 10px 11px 15px;transition:border-color .15s}
+.inputbox:focus-within{border-color:var(--text-3)}
+.inputbox .ph{flex:1;color:var(--text-3);font-size:13px}
+.inputbox .send{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:14px;cursor:pointer;flex-shrink:0}
+.inputbar .hot{margin:9px auto 0;max-width:700px;display:flex;gap:8px;flex-wrap:wrap}
+.hotbtn{font-size:10.5px;color:var(--text-3);background:transparent;border:0;padding:2px 4px;border-bottom:1px solid var(--border-soft);cursor:pointer}
+.hotbtn:hover{color:var(--text);border-bottom-color:var(--text)}
+
+/* ---------- 右侧 TUI:瑞士极简,线分隔,不用框 ---------- */
+.details{width:316px;flex-shrink:0;background:var(--bg-base);border-left:1px solid var(--border-soft);display:flex;flex-direction:column;overflow:hidden}
+.dets-head{display:flex;align-items:baseline;gap:8px;padding:16px 22px 12px}
+.dets-head .t{font-size:12px;font-weight:600}
+.dets-head .poll{font-size:9px;color:var(--text-3)}
+.dets-head .x{margin-left:auto;width:22px;height:22px;border:0;background:transparent;color:var(--text-3);font-size:15px;cursor:pointer;line-height:1}
+.dets-tabs{display:flex;padding:0 22px;border-bottom:1px solid var(--border-soft)}
+.dets-tabs .tab{font-size:10.5px;font-weight:500;color:var(--text-3);padding:8px 18px 8px 0;cursor:pointer;border-bottom:1px solid transparent;margin-bottom:-1px}
+.dets-tabs .tab.active{color:var(--text)}
+.dets-tabs .tab.active::after{content:"";display:block;height:1px;background:var(--text);margin-top:6px}
+.dets-body{flex:1;overflow-y:auto;padding:6px 22px 20px}
+/* kicker */
+.pf-kicker{display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px 7px;border-bottom:1px solid var(--border-soft)}
+.pf-kicker .k{font-size:8.5px;font-weight:700;color:var(--text-3);letter-spacing:.16em;text-transform:uppercase}
+.pf-kicker .meta{font-size:9px;color:var(--text-3)}
+/* 主数字 */
+.hero-num{display:flex;align-items:baseline;gap:9px;padding:15px 2px 16px;border-bottom:1px solid var(--border-soft)}
+.hero-num .n{font-size:42px;font-weight:250;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.hero-num .u{font-size:11px;color:var(--text-3)}
+/* 表(线分隔) */
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl tr{border-bottom:1px solid var(--border-soft)}
+.tbl tr:last-child{border-bottom:0}
+.tbl td{padding:8px 2px;vertical-align:top}
+.tbl td:first-child{color:var(--text-3);width:54%;letter-spacing:.02em}
+.tbl td:last-child{text-align:right;color:var(--text-2);font-variant-numeric:tabular-nums}
+.tbl td b{color:var(--text);font-weight:600}
+.tbl .st{font-size:9px;color:var(--text-3)}
+/* 就绪标记:纯线,无盒 */
+.ready{border-top:1px solid var(--border-soft)}
+.ready .rt{display:flex;align-items:baseline;justify-content:space-between;padding:10px 2px;border-bottom:1px solid var(--border-soft);font-size:11px}
+.ready .n{color:var(--text-2);font-weight:500}
+.ready .s{color:var(--text-3);font-size:9px;letter-spacing:.04em}
+.section-h{font-size:8.5px;font-weight:700;color:var(--text-3);letter-spacing:.16em;text-transform:uppercase;margin:18px 2px 2px}
+.idle{display:flex;align-items:baseline;justify-content:space-between;padding:9px 2px;border-bottom:1px solid var(--border-soft);font-size:11px;color:var(--text-2)}
+.idle .which{color:var(--text-3)}
+.dets-foot{border-top:1px solid var(--border-soft);padding:9px 22px;font-size:8.5px;color:var(--text-3);display:flex;justify-content:space-between;letter-spacing:.02em}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- 侧边栏 -->
+  <aside class="sidebar">
+    <div class="sb-brand">DeepSeek Harness</div>
+    <div class="sb-hint">web</div>
+    <div class="sb-search">⌕ 搜索历史会话…</div>
+    <div class="sb-sessions">
+      <div class="sb-group">会话</div>
+      <div class="sess active"><span class="sess-title">PaperForge 文献库</span><span class="sess-time">现在</span></div>
+      <div class="sess"><span class="sess-title">深读 Attention Is All…</span><span class="sess-time">2h</span></div>
+      <div class="sess"><span class="sess-title">配置 Zotero 库</span><span class="sess-time">昨天</span></div>
+      <div class="sess"><span class="sess-title">OCR 批量</span><span class="sess-time">昨天</span></div>
+      <div class="sb-group">工作区</div>
+      <div class="sess"><span class="sess-title">research-vault</span></div>
+      <div class="sess"><span class="sess-title">reading-2026</span></div>
+    </div>
+    <div class="sb-pf">
+      <div class="pf-lbl">Plugin</div>
+      <div class="pf-name">PaperForge</div>
+      <div class="pf-meta">v1.5.2 · one-shot CLI</div>
+      <div class="pf-line"><span class="tick"></span>运行中 · vec0+FTS5</div>
+    </div>
+  </aside>
+
+  <!-- 聊天区 -->
+  <main class="chat">
+    <div class="chat-head">
+      <div><div class="t">PaperForge 文献库</div><div class="sub">agent · deepseek-v4-pro</div></div>
+      <span class="toolmode">STANDARD</span>
+    </div>
+    <div class="msgs" id="msgs">
+      <div class="bubble agent"><div class="who">assistant</div><div class="box">你好。PaperForge 研究助手已就绪，库已同步、检索与全文索引完好。我可以帮你做文献检索、深读和解答。</div></div>
+      <div class="bubble user"><div class="who">你</div><div class="box">帮我找 2024 年关于 LoRA 微调 的文献，挑几篇精读</div></div>
+      <div class="toolcall"><div class="tc"><span class="nm">pf_search</span><span class="arg">"微调 LoRA" · 2024 · nlp</span><span class="spin"></span><span class="st">running</span></div></div>
+      <div class="toolcall"><div class="tc"><span class="nm">pf_retrieve</span><span class="arg">top_k=5</span><span class="spin"></span><span class="st">running</span></div></div>
+    </div>
+    <div class="inputbar">
+      <div class="inputbox"><div class="ph">给 PaperForge 发消息，或 @paperforge 让它干活…</div><button class="send">➤</button></div>
+      <div class="hot">
+        <span class="hotbtn">检索文献</span>
+        <span class="hotbtn">深读当前库</span>
+        <span class="hotbtn">OCR 一批</span>
+        <span class="hotbtn">状态总览</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- 右侧 details:TUI -->
+  <section class="details">
+    <div class="dets-head"><span class="t">PaperForge</span><span class="poll">snapshot · live</span><button class="x">×</button></div>
+    <div class="dets-tabs">
+      <div class="tab active" data-pane="library">文献库</div>
+      <div class="tab" data-pane="status">运行</div>
+    </div>
+    <div class="dets-body">
+      <!-- 文献库 -->
+      <div class="pane" id="pane-library">
+        <div class="pf-kicker"><span class="k">Health</span><span class="meta">2026-08-15</span></div>
+        <!-- hero: 健康信号,非论文数 -->
+        <div class="hero-num"><span class="n" style="font-size:26px;font-weight:500">Library healthy</span></div>
+        <div class="section-h">Ready</div>
+        <div class="ready">
+          <div class="rt"><span class="n">全部核心系统</span><span class="s">运行正常</span></div>
+          <div class="rt"><span class="n">同步</span><span class="s">Zotero · 2min 前</span></div>
+          <div class="rt"><span class="n">检索</span><span class="s">向量 + 全文就绪</span></div>
+          <div class="rt"><span class="n">OCR</span><span class="s">管道就绪</span></div>
+        </div>
+        <div class="section-h">Needs attention</div>
+        <div class="ready">
+          <div class="rt"><span class="n" style="color:var(--text-3)">—</span><span class="s">无,一切正常</span></div>
+        </div>
+        <div class="section-h">Library</div>
+        <table class="tbl">
+          <tr><td>文献</td><td><b>248</b> <span class="st">篇</span></td></tr>
+          <tr><td>可检索</td><td><b>238</b> <span class="st">/ 248</span></td></tr>
+          <tr><td>已深读</td><td><b>6</b> <span class="st">篇</span></td></tr>
+          <tr><td>本月新增</td><td><b>9</b> <span class="st">篇</span></td></tr>
+        </table>
+        <div class="section-h">Recent</div>
+        <table class="tbl">
+          <tr><td>Zotero 同步</td><td>2 min 前</td></tr>
+          <tr><td>索引更新</td><td>06:11</td></tr>
+          <tr><td>OCR 批量</td><td>昨日</td></tr>
+        </table>
+      </div>
+      <!-- 运行(Phase 0:subprocess,非长驻) -->
+      <div class="pane" id="pane-status" style="display:none">
+        <div class="pf-kicker"><span class="k">Runtime</span><span class="meta">Phase 0 · subprocess</span></div>
+        <table class="tbl">
+          <tr><td>Python</td><td>3.12.4</td></tr>
+          <tr><td>Invocation</td><td>subprocess</td></tr>
+          <tr><td>PaperForge</td><td>1.5.2</td></tr>
+          <tr><td>向量引擎</td><td>sqlite-vec</td></tr>
+          <tr><td>全文引擎</td><td>FTS5</td></tr>
+        </table>
+        <div class="section-h">最近</div>
+        <table class="tbl">
+          <tr><td>Zotero 同步</td><td>10:02 · 无变更</td></tr>
+          <tr><td>索引更新</td><td>06:11 · 238 篇</td></tr>
+          <tr><td>OCR 批量</td><td>昨天 · 45 篇</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="dets-foot"><span>sqlite · vec0 + FTS5</span><span>paperforge 1.5.2</span></div>
+  </section>
+</div>
+
+<script>
+document.querySelectorAll('.dets-tabs .tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.dets-tabs .tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.pane').forEach(p=>p.style.display='none');
+    document.getElementById('pane-'+tab.dataset.pane).style.display='block';
+  });
+});
+document.querySelector('.dets-head .x').addEventListener('click',()=>{
+  const d=document.querySelector('.details');
+  d.style.display = (d.style.display==='none') ? 'flex' : 'none';
+});
+</script>
+</body>
+</html>

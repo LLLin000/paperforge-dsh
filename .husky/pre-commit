@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+# Inherited from the github-release repo (upstream pre-commit shape:
+# typecheck + tests).  lint-staged/prettier and the Python destructive-
+# delete guard were NOT ported: upstream lint-staged has no rules, and
+# this repo has no Python runtime code (adapter is TS-only by design D3).
+npm run typecheck && npm run test

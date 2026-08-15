@@ -11,6 +11,7 @@ PaperForge 的 DeepSeek Harness (DSH) 适配仓库。
 Paperforge-dsh/
 ├── docs/
 │   ├── design.md                 # DSH 移植设计方案
+│   ├── api-contract.md           # 前端↔后端接口冻结基准（后端优化清单）
 │   └── ui-prototype.html         # UI 原型
 ├── packages/
 │   ├── paperforge-client/        # 共享 TS 调用层（Obsidian / DSH 共用传输）
